@@ -2,11 +2,23 @@ import webob
 import json
 
 
-class Response(webob.Response):
+class Response(object):
 
-    def __init__(self):
+    def __init__(self, send_callback):
         self.webob_response = webob.Response()
         self._body = ''
+        self.send_callback = send_callback
+
+    def send(self):
+        self.send_callback()
+
+    def abort(self, status_code):
+        self.status(status_code)
+        self.send()
+
+    def ok(self):
+        self.status(200)
+        self.send()
 
     def header(self, name, value=None):
         if value:
@@ -59,3 +71,9 @@ class Response(webob.Response):
     def set_body(self, new_body):
         self._body = new_body
         self.webob_response.text = new_body
+
+    def set_cookie(self, *args, **kwargs):
+        self.webob_response.set_cookie(*args, **kwargs)
+
+    def delete_cookie(self, *args, **kwargs):
+        self.webob_response.delete_cookie(*args, **kwargs)
