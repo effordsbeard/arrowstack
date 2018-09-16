@@ -149,12 +149,24 @@ class View(object):
                      return True
             return False
 
-        def level(data, params, current_level=0):
+        def level_params(params, data):
 
-            if type(params) == dict:
-                for param, settings in params.items():
-                    if not has_objects(settings) and settings.get('required') and not data.get(param):
+            for param, value in params.items():
+                if has_objects(value):
+                    if not level_params(value, data.get(param, {})):
                         return False
+                else:
+                    if value.get('required'):
+                        try:
+                            data[param]
+                        except:
+                            return False
+            return True
+
+        if not level_params(self.json, self.req.json()):
+            return False
+
+        def level(data, params, current_level=0):
 
             for key, value in data.items():
                 current_params = params.get(key)
