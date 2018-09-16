@@ -34,8 +34,11 @@ class Request(object):
     def params(self):
         return self._params
 
-    def param(self, name, placeholder=None):
-        return self._params.get(name, placeholder)
+    def param(self, name, value=None):
+        if not value:
+            return self._params.get(name)
+        else:
+            self._params[name] = value
 
     def header(self, name, placeholder=None):
         return self.webob_request.headers.get(name, placeholder)
