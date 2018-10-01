@@ -60,7 +60,7 @@ class View(object):
                     try:
                         self.req.param(param, settings.type(value)) # save with new converted type
                     except:
-                        print('can\'t convert param to type')
+                        return False
 
                 if not self.check_settings(settings, value): return False
 
@@ -77,6 +77,18 @@ class View(object):
         if not self.validate_regex(settings.get('regex'), value): return False
 
         if not self.validate_type(settings.get('type'), value): return False
+
+        max = settings.get('max')
+        max = settings.get('min')
+        if max:
+            if type(value) == str:
+                if len(value) > max: return False
+            if value > max: return False
+
+        if min:
+            if type(value) == str:
+                if len(value) < min: return False
+            if value < settings.get('min'): return False
 
         return True
 
