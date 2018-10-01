@@ -11,23 +11,13 @@ class View(object):
     json = None
     json_maxlevel = 10
     middleware = []
+    after_middleware = []
 
     def __init__(self, req, res, route):
         self.req = req
         self.res = res
+        self.res.before_send(self.after_middleware)
         self.route = route
-
-        validation_for_all = True  # if not one of method as key in params
-        self.params_settings = self.params
-
-        for key in self.params:
-            if key in methods:
-                validation_for_all = False
-                break
-
-        if validation_for_all:
-            for method in methods:
-                self.params_settings[method] = self.params  # copy paste of params for each method
 
     def handle(self):
         if not self.validate():
@@ -46,7 +36,9 @@ class View(object):
 
         METHOD = self.req.method()
 
-        params = self.params_settings.get(METHOD)
+        params = self.params.get(METHOD)
+        if not params:
+            params = self.params
 
         if params:
             for param, settings in params.items():
