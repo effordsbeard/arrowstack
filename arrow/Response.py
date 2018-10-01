@@ -80,8 +80,10 @@ class Response(object):
         self._body = new_body
         self.webob_response.text = new_body
 
-    def set_cookie(self, *args, **kwargs):
-        self.webob_response.set_cookie(*args, **kwargs)
+    def cookie(self, key, value, **kwargs):
+        if not type(value) == str:
+            raise TypeError('Cookie value must be string')
+        self.webob_response.set_cookie(key, value, **kwargs)
 
     def delete_cookie(self, *args, **kwargs):
         self.webob_response.delete_cookie(*args, **kwargs)

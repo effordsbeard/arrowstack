@@ -52,6 +52,9 @@ class Request(object):
 
         return self._json
 
+    def cookie(self, key):
+        return self.webob_request.cookies.get(key)
+
     def parseargs(self, args):
         _a = {}
         for key, value in args.items():
