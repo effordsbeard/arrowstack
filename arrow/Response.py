@@ -10,7 +10,15 @@ class Response(object):
         self.send_callback = send_callback
 
     def send(self):
+        if self.before_send_mw:
+            for mw in self.before_send_mw:
+                mw(self)
         self.send_callback()
+
+    def before_send(self, mw):
+        if not type(mw) is list:
+            mw = [mw]
+        self.before_send_mw= mw
 
     def abort(self, status_code):
         self.status(status_code)
