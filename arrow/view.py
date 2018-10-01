@@ -29,24 +29,6 @@ class View(object):
             for method in methods:
                 self.params_settings[method] = self.params  # copy paste of params for each method
 
-    def get(self, req, res):
-        return self.res.abort(405)
-
-    def post(self, req, res):
-        return self.res.abort(405)
-
-    def put(self, req, res):
-        return self.res.abort(405)
-
-    def patch(self, req, res):
-        return self.res.abort(405)
-
-    def delete(self, req, res):
-        return self.res.abort(405)
-
-    def options(self, req, res):
-        return self.res.abort(405)
-
     def handle(self):
         if not self.validate():
             return self.res.abort(400)
@@ -55,18 +37,10 @@ class View(object):
             for mw in self.middleware:
                 mw(self.req, self.res)
 
-        if self.req.method() == 'GET':
-            self.get(self.req, self.res)
-        elif self.req.method() == 'POST':
-            self.post(self.req, self.res)
-        elif self.req.method() == 'PUT':
-            self.put(self.req, self.res)
-        elif self.req.method() == 'PATCH':
-            self.patch(self.req, self.res)
-        elif self.req.method() == 'DELETE':
-            self.delete(self.req, self.res)
-        elif self.req.method() == 'OPTIONS':
-            self.options(self.req, self.res)
+        handler = getattr(self, self.req.method().lower())
+        if not handler:
+            return self.res.abort(405)
+        return handler(self.req, self.res)
 
     def validate(self):
 
@@ -89,14 +63,14 @@ class View(object):
                     else:
                         return False
 
-                if not self.check_settings(settings, value): return False
-
                 # and now try to convert to needed type
                 if settings.get('convert'):
                     try:
                         self.req.param(param, settings.type(value)) # save with new converted type
                     except:
                         print('can\'t convert param to type')
+
+                if not self.check_settings(settings, value): return False
 
         if self.req.is_json:
             return self.validate_json()
@@ -116,7 +90,9 @@ class View(object):
 
     def validate_func(self, func, value):
         if not func: return True
-        if not settings['func'](value):
+        if type(func) == str:
+            func = getattr(self, func)
+        if not func(value):
             return False
         return True
 
