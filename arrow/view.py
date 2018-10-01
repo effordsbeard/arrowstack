@@ -78,17 +78,18 @@ class View(object):
 
         if not self.validate_type(settings.get('type'), value): return False
 
-        max = settings.get('max')
-        max = settings.get('min')
-        if max:
+        _max = settings.get('max')
+        _min = settings.get('min')
+        
+        if _max:
             if type(value) == str:
-                if len(value) > max: return False
-            if value > max: return False
+                if len(value) > _max: return False
+            if value > _max: return False
 
-        if min:
+        if _min:
             if type(value) == str:
-                if len(value) < min: return False
-            if value < settings.get('min'): return False
+                if len(value) < _min: return False
+            if value < _min: return False
 
         return True
 
