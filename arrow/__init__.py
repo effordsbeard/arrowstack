@@ -4,11 +4,14 @@ from routes import Mapper
 import importlib
 import time
 import threading
+import tequilla
+import os, os.path
 
 from .application import Application
 from .view import View
 from .Request import Request
 from .Response import Response
+from .Object import Object
 import arrow.middleware as middleware
 import arrow.middleware.auth
 
@@ -21,10 +24,19 @@ class Arrow(object):
 
     middleware = middleware
 
+    template_handlers = {}
+
     def __init__(self):
         self.map = Mapper()
-        # self.map.connect(None, "/error/{action}/{id}", controller="error")
-        # self.map.connect("home", "/", controller="main", action="index")
+
+    def templates(self, path, name='main'):
+        handler = tequilla(os.path.join(os.getcwd(), path))
+        handler.compile()
+        self.template_handlers[name] = handler
+        return handler
+
+    def render(self, template_name, data={}, handler_name='main'):
+        return self.template_handlers[handler_name].render(template_name, data)
 
     def __call__(self):
         return Arrow()
@@ -40,6 +52,12 @@ class Arrow(object):
         view = module.View
         self.map.connect(None, url_template, controller=handler_path)
         self.url_controllers[handler_path] = view
+
+    def obj(self, data, name=None):
+        o = Object(data)
+        if name:
+            setattr(self, name, o)
+        return o
 
     def wsgi_app(self, environ, start_response):
 
