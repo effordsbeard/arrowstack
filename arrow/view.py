@@ -13,11 +13,12 @@ class View(object):
     middleware = []
     after_middleware = []
 
-    def __init__(self, req, res, route):
+    def __init__(self, req, res, route, params={}):
         self.req = req
         self.res = res
         self.res.before_send(self.after_middleware)
         self.route = route
+        self.view_params = params
 
     def handle(self):
         if not self.validate():
@@ -80,7 +81,7 @@ class View(object):
 
         _max = settings.get('max')
         _min = settings.get('min')
-        
+
         if _max:
             if type(value) == str:
                 if len(value) > _max: return False

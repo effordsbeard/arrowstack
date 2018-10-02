@@ -14,6 +14,7 @@ from .Response import Response
 from .Object import Object
 import arrow.middleware as middleware
 import arrow.middleware.auth
+import arrow.views
 
 
 class Arrow(object):
@@ -35,6 +36,11 @@ class Arrow(object):
         self.template_handlers[name] = handler
         return handler
 
+    def static(self, static_url, static_path):
+        self.route(static_url, 'arrow.views.static', view_params={
+            'static_path': static_path
+        })
+
     def render(self, template_name, data={}, handler_name='main'):
         return self.template_handlers[handler_name].render(template_name, data)
 
@@ -47,11 +53,14 @@ class Arrow(object):
         }
         Application(self.wsgi_app, options).run()
 
-    def route(self, url_template, handler_path):
+    def route(self, url_template, handler_path, view_params={}):
         module = importlib.import_module(handler_path)
         view = module.View
         self.map.connect(None, url_template, controller=handler_path)
-        self.url_controllers[handler_path] = view
+        self.url_controllers[handler_path] = {
+            'view': view,
+            'params': view_params
+        }
 
     def obj(self, data, name=None):
         o = Object(data)
@@ -60,6 +69,7 @@ class Arrow(object):
         return o
 
     def wsgi_app(self, environ, start_response):
+
 
         event = threading.Event()
 
@@ -72,16 +82,17 @@ class Arrow(object):
         if route:
             controller_name = route.get('controller')
 
-        Handler = self.url_controllers.get(controller_name)
+        view = self.url_controllers.get(controller_name)
 
-        if Handler:
-            thread = threading.Thread(target=Handler(req, res, route).handle)
+        if not view:
+            res.status(404)
+        else:
+            Handler = view.get('view')
+            view_params = view.get('params')
+            thread = threading.Thread(target=Handler(req, res, route, params=view_params).handle)
             thread.daemon = True
             thread.start()
-        else:
-            res.status(404)
-
-        event.wait()
+            event.wait()
 
         start_response(res.status(), res.headerlist())
 
