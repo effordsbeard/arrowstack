@@ -3,7 +3,9 @@ import multiprocessing
 import gunicorn.app.base
 from gunicorn.six import iteritems
 
-def number_of_workers():
+def number_of_workers(all=False):
+    if not all:
+        return 1
     return (multiprocessing.cpu_count() * 2) + 1
 
 
