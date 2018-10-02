@@ -9,7 +9,9 @@ class Response(object):
         self._body = ''
         self.send_callback = send_callback
 
-    def send(self):
+    def send(self, body=None):
+        if body:
+            self.body(body)
         if self.before_send_mw:
             for mw in self.before_send_mw:
                 mw(self)
@@ -73,8 +75,10 @@ class Response(object):
         else:
             return self.webob_response.status_code
 
-    def binary(self):
-        return self.webob_response.body
+    def binary(self, data=None):
+        if not data:
+            return self.webob_response.body
+        self.webob_response.body = data
 
     def set_body(self, new_body):
         self._body = new_body
