@@ -15,11 +15,14 @@ from .Object import Object
 import arrow.middleware as middleware
 import arrow.middleware.auth
 import arrow.views
+from .mime import MIME
 
 
 class Arrow(object):
 
     view = View
+
+    mime = MIME
 
     url_controllers = {}
 
@@ -36,10 +39,22 @@ class Arrow(object):
         self.template_handlers[name] = handler
         return handler
 
-    def static(self, static_url, static_path):
+    def static(self, static_url, static_path, exclude=[]):
         self.route(static_url, 'arrow.views.static', view_params={
-            'static_path': static_path
+            'static_path': static_path,
+            'exclude': exclude
         })
+
+    def file(self, path):
+        try:
+            with open(path, 'rb') as f:
+                return f.read()
+        except:
+            raise IOError('File not found:', path)
+
+    def get_mime(self, path):
+        filename, ext = os.path.splitext(path)
+        return self.mime.get(ext)
 
     def render(self, template_name, data={}, handler_name='main'):
         return self.template_handlers[handler_name].render(template_name, data)
