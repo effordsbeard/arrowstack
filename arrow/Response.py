@@ -52,6 +52,8 @@ class Response(object):
         self.set_body(self.body() + data)
 
     def body(self, data=None):
+        if isinstance(data, (bytes, bytearray)):
+            return self.binary(data)
         if data:
             self.set_body(data)
         else:
