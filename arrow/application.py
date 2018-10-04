@@ -3,17 +3,12 @@ import multiprocessing
 import gunicorn.app.base
 from gunicorn.six import iteritems
 
-def number_of_workers(all=False):
-    if not all:
-        return 1
-    return (multiprocessing.cpu_count() * 2) + 1
-
 
 class Application(gunicorn.app.base.BaseApplication):
 
     def __init__(self, app, options=None):
         self.options = options or {}
-        self.options['workers'] = number_of_workers()
+        self.options['workers'] = (multiprocessing.cpu_count() * 2) + 1 if not options.get('cores_number') else options.get('cores_number')
 
         self.application = app
         super(Application, self).__init__()

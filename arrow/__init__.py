@@ -62,11 +62,12 @@ class Arrow(object):
     def __call__(self):
         return Arrow()
 
-    def run(self, host='localhost', port=8080):
-        options = {
-            'bind': '%s:%d' % (host, port)
+    def run(self, options={}):
+        _options = {
+            'bind': '%s:%d' % (options.get('host', 'localhost'), options.get('port', 8080))
         }
-        Application(self.wsgi_app, options).run()
+        _options.update(options)
+        Application(self.wsgi_app, _options).run()
 
     def route(self, url_template, handler_path, view_params={}):
         module = importlib.import_module(handler_path)
