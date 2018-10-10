@@ -22,6 +22,11 @@ class Response(object):
             mw = [mw]
         self.before_send_mw= mw
 
+    def redirect(self, url, status=301):
+        self.status(status)
+        self.header('Location', url)
+        self.send()
+
     def abort(self, status_code):
         self.status(status_code)
         self.send()

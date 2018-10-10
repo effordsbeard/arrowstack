@@ -12,6 +12,7 @@ class Request(object):
     _json = None
 
     def __init__(self, environ):
+        self.environ = environ
         self.webob_request = webob.Request(environ)
 
         self.is_json = True if self.header('Content-Type') == 'application/json' else False
