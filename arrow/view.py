@@ -2,8 +2,6 @@ from webob import Response
 import re
 
 
-methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
-
 class View(object):
 
     allow_unrecognized = True

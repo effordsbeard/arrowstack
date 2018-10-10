@@ -69,11 +69,14 @@ class Arrow(object):
         _options.update(options)
         Application(self.wsgi_app, _options).run()
 
-    def route(self, url_template, handler_path, view_params={}):
-        module = importlib.import_module(handler_path)
-        view = module.View
-        self.map.connect(None, url_template, controller=handler_path)
-        self.url_controllers[handler_path] = {
+    def route(self, url_template, handler_path=None, view_params={}, name=None, view=None):
+        if handler_path:
+            module = importlib.import_module(handler_path)
+            view = module.View
+            name = handler_path
+
+        self.map.connect(None, url_template, controller=name)
+        self.url_controllers[name] = {
             'view': view,
             'params': view_params
         }
@@ -84,21 +87,25 @@ class Arrow(object):
             setattr(self, name, o)
         return o
 
-    def wsgi_app(self, environ, start_response):
+    def proxy(self, req, controller_name):
+        return self.handle(req.environ, controller_name)
 
-
+    def handle(self, environ, controller_name=None):
         event = threading.Event()
 
         req = Request(environ)
         res = Response(lambda: event.set())
 
-        route = self.map.match(req.path())
-        controller_name = None
+        view = None
 
-        if route:
-            controller_name = route.get('controller')
+        if controller_name:
+            view = self.url_controllers.get(controller_name)
+        else:
+            route = self.map.match(req.path())
+            if route:
+                controller_name = route.get('controller')
 
-        view = self.url_controllers.get(controller_name)
+            view = self.url_controllers.get(controller_name)
 
         if not view:
             res.status(404)
@@ -109,6 +116,12 @@ class Arrow(object):
             thread.daemon = True
             thread.start()
             event.wait()
+
+        return res
+
+    def wsgi_app(self, environ, start_response):
+
+        res = self.handle(environ)
 
         start_response(res.status(), res.headerlist())
 
