@@ -17,12 +17,21 @@ import arrow.middleware.auth
 import arrow.views
 from .mime import MIME
 
+exts = {}
+for ext, mime in MIME.items():
+    if type(mime) == list:
+        for m in mime:
+            exts[m] = ext
+    else:
+        exts[mime] = ext
 
 class Arrow(object):
 
     view = View
 
     mime = MIME
+
+    exts = exts
 
     url_controllers = {}
 
@@ -54,7 +63,10 @@ class Arrow(object):
 
     def get_mime(self, path):
         filename, ext = os.path.splitext(path)
-        return self.mime.get(ext)
+        mime = self.mime.get(ext)
+        if type(mime) == list:
+            mime = mime[0]
+        return mime
 
     def render(self, template_name, data={}, handler_name='main'):
         return self.template_handlers[handler_name].render(template_name, data)

@@ -2,6 +2,7 @@ import webob
 import json
 from copy import deepcopy
 
+import cgi
 
 class Request(object):
 
@@ -18,6 +19,7 @@ class Request(object):
         self.is_json = True if self.header('Content-Type') == 'application/json' else False
 
         self.query = self.parseargs(self.webob_request.GET)
+        self.files = {}
 
         if not self.is_json:
             self.data = self.parseargs(self.webob_request.POST)
@@ -25,6 +27,15 @@ class Request(object):
             self._json = self.json()
 
         self._params = {**self.query, **self.data}
+
+        for name, field in self.data.items():
+            if isinstance(field, cgi.FieldStorage):
+                if '/' in field.filename:
+                    continue
+                self.files[name] = {
+                    'binary': field.value,
+                    'name': field.filename
+                }
 
     def method(self):
         return self.webob_request.method
@@ -41,6 +52,9 @@ class Request(object):
         else:
             self._params[name] = value
 
+    def file(self, name):
+        return self.files.get(name, None)
+
     def header(self, name, placeholder=None):
         return self.webob_request.headers.get(name, placeholder)
 
@@ -52,6 +66,18 @@ class Request(object):
             self._json = {}
 
         return self._json
+
+    def text(self, data=None):
+        if data:
+            self.webob_request.text = data
+        else:
+            return self.webob_request.text
+
+    def body(self, data=None):
+        if data:
+            self.webob_request.body = data
+        else:
+            return self.webob_request.body
 
     def cookie(self, key):
         return self.webob_request.cookies.get(key)

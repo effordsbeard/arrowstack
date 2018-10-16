@@ -1,6 +1,9 @@
 from webob import Response
 import re
+import arrow
+import magic
 
+mime_file_checker = magic.Magic(mime=True)
 
 class View(object):
 
@@ -10,6 +13,7 @@ class View(object):
     json_maxlevel = 10
     middleware = []
     after_middleware = []
+    files = {}
 
     def __init__(self, req, res, route, params={}):
         self.req = req
@@ -34,6 +38,25 @@ class View(object):
     def validate(self):
 
         METHOD = self.req.method()
+
+        for input_name, settings in self.files.items():
+            file = self.req.file(input_name)
+            if not file:
+                if settings.get('required'):
+                    return False
+                continue
+            file_mime = mime_file_checker.from_buffer(file.get('binary'))
+            real_ext = arrow.exts.get(file_mime)
+
+            ext = settings.get('ext')
+            if ext:
+                if not type(ext) == list:
+                    ext = [ext]
+                if not real_ext in ext:
+                    return False
+            if settings.get('max') and len(file.get('binary')) > settings.get('max'):
+                return False
+            file['real_ext'] = real_ext
 
         params = self.params.get(METHOD)
         if not params:
