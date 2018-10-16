@@ -20,7 +20,8 @@ setup(
         'gunicorn',
         'Jinja2',
         'peewee',
-        'docker-compose'
+        'docker-compose',
+        'python-magic'
     ],
     dependency_links=[
         "git+ssh://git@github.com:effordsbeard/tequilla.git"

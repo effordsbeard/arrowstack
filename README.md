@@ -1,4 +1,4 @@
-# Tequilla Template Engine
+# Arrow Framework
 
 ## Installation
 
