@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Home - Arrow</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Arrow</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#arrow-framework">Arrow Framework</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#installation">Installation</a></li>
+        
+            <li><a class="toctree-l3" href="#basic-usage">Basic usage</a></li>
+        
+            <li><a class="toctree-l3" href="#declarative-validation">Declarative validation</a></li>
+        
+            <li><a class="toctree-l3" href="#auto-importing-views">Auto importing views</a></li>
+        
+            <li><a class="toctree-l3" href="#wsgi-app">WSGI app</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Arrow</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="arrow-framework">Arrow Framework</h1>
+<h2 id="installation">Installation</h2>
+<pre><code class="shell">pip install https://github.com/effordsbeard/arrowstack/archive/master.zip
+</code></pre>
+
+<h2 id="basic-usage">Basic usage</h2>
+<pre><code class="python">import arrow
+
+class View(arrow.view):
+
+    def get(self):
+        res.send('arrow')
+
+arrow.route('/', view=View, name=&quot;index&quot;)
+arrow.run()  # uses gunicorn from the box
+</code></pre>
+
+<h2 id="declarative-validation">Declarative validation</h2>
+<pre><code class="python">class View(arrow.view):
+
+    params = {
+        'GET': {
+            'test': {
+                'regex': r'\d{5,}',
+                'required': True,
+                'convert': True,  # make type conversion if type validation is on
+                'type': int  # or you can just check param can be converted
+            }
+        },
+    }
+
+    files = {
+        'file1': {
+            'max': 1000000000,  # KB if you don't use WAF or web server limits
+            'ext': '.png'  # extension is validated by real mime type from binary data
+        }
+    }
+
+    def get(self, req, res): # you can pass req and res params to method or get them via self.req and self.res
+        res.cookie('newcookie', req.param('test'))
+
+    def post(self):
+        file = self.req.file('file1')
+        file.save('/path/to/file%s' % file.real_ext )
+        self.res.ok()
+</code></pre>
+
+<h2 id="auto-importing-views">Auto importing views</h2>
+<h3 id="structure">Structure</h3>
+<pre><code>app
+|    templates
+|        index.tpl
+|    views
+|        users
+|            index.py
+|        index.py
+|    run.py
+</code></pre>
+
+<p>run.py</p>
+<pre><code class="python">    import arrow
+    import os
+
+    arrow.templates('templates')
+    arrow.route('/', 'views.index')
+    arrow.route('/users', 'views.users.index')
+    arrow.run({
+        'host': os.environ.get('HOST'),
+        'port': os.environ.get('PORT')
+    })
+</code></pre>
+
+<p>views/index.py</p>
+<pre><code class="python">    import arrow
+
+    class View(arrow.view):  # class name must be View for auto importinh
+        def get(self):
+            return arrow.render('index.tpl', data={'message': 'hello, world'})  # uses tequilla template engine
+</code></pre>
+
+<p>views/users/index.py</p>
+<pre><code class="python">import arrow
+...
+...
+</code></pre>
+
+<p>templates/index.tpl</p>
+<pre><code class="html">&lt;html&gt;
+    &lt;head&gt;&lt;/head&gt;
+    &lt;body&gt;
+        {{data['message']}}
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Don't forget change working directory to <strong>app</strong></p>
+<pre><code class="shell">cd app
+python run.py
+</code></pre>
+
+<h2 id="wsgi-app">WSGI app</h2>
+<pre><code class="python">import arrow
+wsgi = arrow.wsgi_handler
+</code></pre>
+
+<pre><code class="shell">cd app
+gunicorn run:wsgi
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2018-10-17 13:53:46
+-->
