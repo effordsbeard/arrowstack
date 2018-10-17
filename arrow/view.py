@@ -45,7 +45,7 @@ class View(object):
                 if settings.get('required'):
                     return False
                 continue
-            file_mime = mime_file_checker.from_buffer(file.get('binary'))
+            file_mime = mime_file_checker.from_buffer(file.binary)
             real_ext = arrow.exts.get(file_mime)
 
             ext = settings.get('ext')
@@ -54,9 +54,9 @@ class View(object):
                     ext = [ext]
                 if not real_ext in ext:
                     return False
-            if settings.get('max') and len(file.get('binary')) > settings.get('max'):
+            if settings.get('max') and len(file.binary) > settings.get('max'):
                 return False
-            file['real_ext'] = real_ext
+            file.real_ext = real_ext
 
         params = self.params.get(METHOD)
         if not params:

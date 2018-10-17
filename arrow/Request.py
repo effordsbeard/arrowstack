@@ -1,6 +1,7 @@
 import webob
 import json
 from copy import deepcopy
+from .File import File
 
 import cgi
 
@@ -32,10 +33,7 @@ class Request(object):
             if isinstance(field, cgi.FieldStorage):
                 if '/' in field.filename:
                     continue
-                self.files[name] = {
-                    'binary': field.value,
-                    'name': field.filename
-                }
+                self.files[name] = File(field)
 
     def method(self):
         return self.webob_request.method
