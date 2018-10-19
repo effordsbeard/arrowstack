@@ -53,17 +53,23 @@
     <a class="current" href=".">Home</a>
     <ul class="subnav">
             
-    <li class="toctree-l2"><a href="#arrow-framework">Arrow Framework</a></li>
+    <li class="toctree-l2"><a href="#introduction">Introduction</a></li>
+    
+
+    <li class="toctree-l2"><a href="#installation">Installation</a></li>
+    
+
+    <li class="toctree-l2"><a href="#basic-usage">Basic usage</a></li>
+    
+
+    <li class="toctree-l2"><a href="#validation">Validation</a></li>
+    
+
+    <li class="toctree-l2"><a href="#auto-importing-views">Auto importing views</a></li>
     
         <ul>
         
-            <li><a class="toctree-l3" href="#installation">Installation</a></li>
-        
-            <li><a class="toctree-l3" href="#basic-usage">Basic usage</a></li>
-        
-            <li><a class="toctree-l3" href="#declarative-validation">Declarative validation</a></li>
-        
-            <li><a class="toctree-l3" href="#auto-importing-views">Auto importing views</a></li>
+            <li><a class="toctree-l3" href="#proxy">Proxy</a></li>
         
             <li><a class="toctree-l3" href="#wsgi-app">WSGI app</a></li>
         
@@ -105,12 +111,14 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="arrow-framework">Arrow Framework</h1>
-<h2 id="installation">Installation</h2>
+                <h1 id="introduction">Introduction</h1>
+<p>Arrow is for writing expressive and declarative code. Arrow decrease lines of code without untraced magic. It uses tested and proved by time libraries for handling requests (webob, routes, cgi). Arrow targets on writing less with ready to start application in minutes.</p>
+<p>There is several features from the box provided as middleware and simple functionality for writing your own.</p>
+<h1 id="installation">Installation</h1>
 <pre><code class="shell">pip install https://github.com/effordsbeard/arrowstack/archive/master.zip
 </code></pre>
 
-<h2 id="basic-usage">Basic usage</h2>
+<h1 id="basic-usage">Basic usage</h1>
 <pre><code class="python">import arrow
 
 class View(arrow.view):
@@ -122,7 +130,7 @@ arrow.route('/', view=View, name=&quot;index&quot;)
 arrow.run()  # uses gunicorn from the box
 </code></pre>
 
-<h2 id="declarative-validation">Declarative validation</h2>
+<h1 id="validation">Validation</h1>
 <pre><code class="python">class View(arrow.view):
 
     params = {
@@ -139,12 +147,20 @@ arrow.run()  # uses gunicorn from the box
     files = {
         'file1': {
             'max': 1000000000,  # KB if you don't use WAF or web server limits
-            'ext': '.png'  # extension is validated by real mime type from binary data
+            'ext': '.png'  # extension is validated by real mime type from binary data,
+            'required': True  # one line here and no if's and http aborting
         }
     }
 
     def get(self, req, res): # you can pass req and res params to method or get them via self.req and self.res
         res.cookie('newcookie', req.param('test'))
+        req.header('Location', 'http://google.com')
+        res.status(301)
+        # or res.redirect()
+        res.send()  # here is the end of http handling
+
+        #...some code after response to client
+        return  # here is the end signal for worker process and res.send() if if was not called before
 
     def post(self):
         file = self.req.file('file1')
@@ -152,8 +168,8 @@ arrow.run()  # uses gunicorn from the box
         self.res.ok()
 </code></pre>
 
-<h2 id="auto-importing-views">Auto importing views</h2>
-<h3 id="structure">Structure</h3>
+<h1 id="auto-importing-views">Auto importing views</h1>
+<p>Structure</p>
 <pre><code>app
 |    templates
 |        index.tpl
@@ -205,6 +221,23 @@ arrow.run()  # uses gunicorn from the box
 python run.py
 </code></pre>
 
+<h2 id="proxy">Proxy</h2>
+<pre><code class="python">import arrow
+
+arrow.route('/', 'views.index')
+arrow.route('/auth', 'views.auth.index')
+</code></pre>
+
+<p>views/index.py</p>
+<pre><code class="python">import arrow
+
+class View(arrow.view):
+
+  def get(self):
+    res = arrow.proxy(self.req, 'views.auth.index')
+    res.send()
+</code></pre>
+
 <h2 id="wsgi-app">WSGI app</h2>
 <pre><code class="python">import arrow
 wsgi = arrow.wsgi_handler
@@ -252,5 +285,5 @@ gunicorn run:wsgi
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2018-10-17 13:53:46
+Build Date UTC : 2018-10-19 09:00:12
 -->
