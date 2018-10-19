@@ -35,6 +35,9 @@ class Request(object):
                     continue
                 self.files[name] = File(field)
 
+    def referer(self):
+        return self.header('Referer')
+
     def method(self):
         return self.webob_request.method
 

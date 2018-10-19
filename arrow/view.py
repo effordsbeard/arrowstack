@@ -88,7 +88,7 @@ class View(object):
 
                 if not self.check_settings(settings, value): return False
 
-        if self.req.is_json:
+        if self.req.is_json and self.json:
             return self.validate_json()
 
         return True
