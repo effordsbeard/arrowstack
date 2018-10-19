@@ -1,0 +1,5 @@
+site_name: Arrow
+theme:
+  name: 'readthedocs'
+nav:
+    - Home: index.md

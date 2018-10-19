@@ -2,6 +2,7 @@ from webob import Response
 import re
 import arrow
 import magic
+from .Object import Object
 
 mime_file_checker = magic.Magic(mime=True)
 
@@ -14,6 +15,7 @@ class View(object):
     middleware = []
     after_middleware = []
     files = {}
+    props = Object()
 
     def __init__(self, req, res, route, params={}):
         self.req = req

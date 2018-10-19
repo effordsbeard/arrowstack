@@ -18,8 +18,6 @@ setup(
         'docker',
         'pymist',
         'gunicorn',
-        'Jinja2',
-        'peewee',
         'docker-compose',
         'python-magic'
     ],

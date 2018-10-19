@@ -42,6 +42,10 @@ class Arrow(object):
     def __init__(self):
         self.map = Mapper()
 
+    # TODO: checking for env variables and sth else for app working
+    def need(self):
+        pass
+
     def templates(self, path, name='main'):
         handler = tequilla(os.path.join(os.getcwd(), path))
         handler.compile()
@@ -99,6 +103,7 @@ class Arrow(object):
             setattr(self, name, o)
         return o
 
+    # TODO: repair res event setting
     def proxy(self, req, controller_name):
         return self.handle(req.environ, controller_name)
 
