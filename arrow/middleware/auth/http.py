@@ -28,9 +28,7 @@ class HttpAuth(object):
 
         username, password = base64.b64decode(token).decode("utf-8").split(':')
 
-        if self.check_user(username, password):
-            return res.ok()
-        else:
+        if not self.check_user(username, password):
             res.status(401)
             res.header('WWW-Authenticate', 'Basic realm="Provide credentials", charset="UTF-8"')
             return res.send()

@@ -20,7 +20,7 @@ class Response(object):
     def before_send(self, mw):
         if not type(mw) is list:
             mw = [mw]
-        self.before_send_mw= mw
+        self.before_send_mw = mw
 
     def redirect(self, url, status=301):
         self.status(status)
