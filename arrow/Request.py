@@ -59,6 +59,36 @@ class Request(object):
     def header(self, name, placeholder=None):
         return self.webob_request.headers.get(name, placeholder)
 
+    def headers(self, name, placeholder=None):
+        return self.webob_request.headers
+
+    def ip(self):
+        return self.webob_request.client_addr
+
+    def ua(self):
+        return self.webob_request.user_agent
+
+    def url(self):
+        return self.webob_request.url
+
+    def domain(self):
+        return self.webob_request.domain
+
+    def host(self):
+        return self.webob_request.host
+
+    def port(self):
+        return self.webob_request.host_port
+
+    def query_string(self):
+        return self.webob_request.query_string
+
+    def query(self):
+        return self.webob_request.GET
+
+    def post(self):
+        return self.webob_request.POST
+
     def json(self):
         try:
              if not self._json:
