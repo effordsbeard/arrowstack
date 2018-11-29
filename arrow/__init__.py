@@ -1,6 +1,6 @@
 import sys
 from webob import Request
-from routes import Mapper
+from routes import Mapper as RoutesMapper
 import importlib
 import time
 import threading
@@ -16,6 +16,9 @@ import arrow.middleware as middleware
 import arrow.middleware.auth
 import arrow.views
 from .mime import MIME
+from .mappers import Mapper
+from .mappers.fields.field import Field
+
 
 exts = {}
 for ext, mime in MIME.items():
@@ -29,6 +32,9 @@ class Arrow(object):
 
     view = View
 
+    mapper = Mapper
+    field = Field
+
     mime = MIME
 
     exts = exts
@@ -40,11 +46,21 @@ class Arrow(object):
     template_handlers = {}
 
     def __init__(self):
-        self.map = Mapper()
+        self.map = RoutesMapper()
 
     # TODO: checking for env variables and sth else for app working
-    def need(self):
-        pass
+    def need(self, sub, names=[]):
+        if not list == type(names):
+            names = [names]
+        if sub == 'env':
+            for name in names:
+                if not os.environ.get(name):
+                    print('NEED: %s env. - ' % name)
+            return
+
+
+    def prop(self, name, value):
+        setattr(self, name, value)
 
     def templates(self, path, name='main'):
         handler = tequilla(os.path.join(os.getcwd(), path))

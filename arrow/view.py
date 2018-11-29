@@ -30,7 +30,9 @@ class View(object):
 
         if self.middleware:
             for mw in self.middleware:
-                mw(self.req, self.res)
+                result = mw(self.req, self.res)
+                if result == False:
+                    return
 
         handler = getattr(self, self.req.method().lower())
         if not handler:

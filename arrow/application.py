@@ -8,7 +8,7 @@ class Application(gunicorn.app.base.BaseApplication):
 
     def __init__(self, app, options=None):
         self.options = options or {}
-        self.options['workers'] = (multiprocessing.cpu_count() * 2) + 1 if not options.get('cores_number') else options.get('cores_number')
+        self.options['workers'] = (multiprocessing.cpu_count() * 2) + 1 if not options.get('workers') else options.get('workers')
 
         self.application = app
         super(Application, self).__init__()
