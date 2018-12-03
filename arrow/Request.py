@@ -59,7 +59,7 @@ class Request(object):
     def header(self, name, placeholder=None):
         return self.webob_request.headers.get(name, placeholder)
 
-    def headers(self, name, placeholder=None):
+    def headers(self):
         return self.webob_request.headers
 
     def ip(self):

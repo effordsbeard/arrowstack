@@ -4,7 +4,10 @@ class Crossorigin(object):
         self.origin = origin
         self.methods = methods
         self.max_age = max_age
-        self.headers = headers
+        if headers:
+            self.headers = ', '.join(headers)
+        else:
+            self.headers = '*'
 
     def getmethods(self):
         if self.methods is not None:
@@ -19,10 +22,10 @@ class Crossorigin(object):
             return ''
 
     def __call__(self, req, res):
+        res.header('Access-Control-Allow-Origin', self.origin)
+        res.header('Access-Control-Allow-Methods', self.getmethods())
+        res.header('Access-Control-Max-Age', str(self.max_age))
+        res.header('Access-Control-Allow-Headers', self.headers)
         if req.method() == 'OPTIONS':
-            res.header('Access-Control-Allow-Origin', self.origin)
-            res.header('Access-Control-Allow-Methods', self.getmethods())
-            if self.max_age:
-                res.header('Access-Control-Max-Age', str(self.max_age))
-            if self.headers:
-                res.header('Access-Control-Allow-Headers', self.headers)
+            res.ok()
+            return False
