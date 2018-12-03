@@ -2,6 +2,9 @@ import webob
 import json
 from copy import deepcopy
 from .File import File
+import urllib.parse as urlp
+from .Object import Object
+
 
 import cgi
 
@@ -35,7 +38,18 @@ class Request(object):
                     continue
                 self.files[name] = File(field)
 
-    def referer(self):
+    def referer(self, parse=False):
+        if parse:
+            if not hasattr(self, '_referer'):
+                r = urlp.urlparse(self.header('Referer'))
+                q = urlp.parse_qs(r.query)
+                p = r.path
+                self._referer = Object({
+                    'hostname': r.hostname,
+                    'query': dict(q),
+                    'path': p
+                }, recursive=False)
+            return self._referer
         return self.header('Referer')
 
     def method(self):
