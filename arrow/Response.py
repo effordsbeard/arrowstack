@@ -94,6 +94,7 @@ class Response(object):
     def cookie(self, key, value, **kwargs):
         if not type(value) == str:
             raise TypeError('Cookie value must be string')
+        kwargs['max_age'] = kwargs['max_age'] if kwargs.get('max_age') else 365 * 24 * 60 * 60
         self.webob_response.set_cookie(key, value, **kwargs)
 
     def delete_cookie(self, *args, **kwargs):
